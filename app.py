@@ -64,7 +64,7 @@ def main():
         image_array = preprocess_image(image)
 
         # Run inference
-        output = run_inference(image_array, 'Lung_cancer_app2/model.tflite')
+        output = run_inference(image_array, 'model.tflite')
 
         # Define class names
         class_names = [
