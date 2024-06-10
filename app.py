@@ -77,14 +77,10 @@ def main():
 
         # Get predicted class index with the highest score
         predicted_class_index = np.argmax(output)
-        predicted_score = output[0][predicted_class_index]
         
-        # Display only the predicted class and score with the highest score
+        # Display only the predicted class
         predicted_class = class_names[predicted_class_index]
         st.write("Predicted class:", predicted_class)
-        st.write("Predicted Score:", predicted_score)
 
 if __name__ == "__main__":
     main()
-
-
