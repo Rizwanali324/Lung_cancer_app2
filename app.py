@@ -27,7 +27,7 @@ def run_inference(image_array, model_path):
 
 # Define Streamlit app
 def main():
-    st.title("Image Classification  histopathological images of lung and colon tissues")
+    st.title("Image Classification of Histopathological Images")
 
     # Information about the dataset
     st.markdown("""
@@ -52,15 +52,13 @@ def main():
     2. Click the "Predict" button to get the classification result.
     """)
 
-    # File uploader
-    st.sidebar.title("Upload Image")
-    uploaded_file = st.sidebar.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
+    # Display the upload button at the bottom
+    uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
     if uploaded_file is not None:
         # Preprocess image
         image = Image.open(uploaded_file)
-        image = image.resize((200, 200))  # Resize the image to 200x200 pixels
-        st.image(image, caption="Uploaded Image", width=500)
+        st.image(image, caption="Uploaded Image",width=300)
         image_array = preprocess_image(image)
 
         # Run inference
