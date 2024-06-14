@@ -29,9 +29,107 @@ def run_inference(image_array, model_path):
 def main():
     st.title("Image Classification of Histopathological Images")
 
-    # Information about the dataset
+    # Custom CSS for animated background and different colored sections
+    st.markdown("""
+    <style>
+    body {
+        animation: gradientAnimation 15s ease infinite;
+        background-size: 400% 400%;
+        background-image: linear-gradient(45deg, #EE7752, #E73C7E, #23A6D5, #23D5AB);
+    }
+
+    @keyframes gradientAnimation {
+        0% {
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+
+    .dataset-info {
+        background-color: rgba(255, 255, 255, 0.8);
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        color: #333333;
+    }
+
+    .instructions {
+        background-color: rgba(255, 255, 255, 0.6);
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        color: #333333;
+    }
+
+    .caution-note {
+        background-color: rgba(255, 255, 255, 0.4);
+        padding: 15px;
+        margin-bottom: 15px;
+        border-left: 6px solid #FF5733;
+        border-radius: 5px;
+        box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+        color: #333333;
+    }
+
+    .caution-note:last-child {
+        margin-bottom: 0;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+
+    # Instructions for the user
+    st.markdown("""
+    ## Instructions
+    
+    1. Upload an image file (JPEG or PNG format) of a histopathological sample.
+    2. Click the "Predict" button to get the Prediction result.
+    """)
+
+    uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
+    
+    if uploaded_file is not None:
+        # Preprocess image
+        image = Image.open(uploaded_file)
+        st.image(image, caption="Uploaded Image", width=300)
+        image_array = preprocess_image(image)
+
+        # Predict button
+        if st.button("Predict"):
+            # Run inference
+            output = run_inference(image_array, 'model.tflite')
+
+            # Define class names
+            class_names = [
+                "Lung benign tissue",
+                "Lung adenocarcinoma",
+                "Lung squamous cell carcinoma",
+                "Colon adenocarcinoma",
+                "Colon benign tissue"
+            ]
+
+            # Get predicted class index with the highest score
+            predicted_class_index = np.argmax(output)
+            
+            # Display predicted class
+            predicted_class = class_names[predicted_class_index]
+            st.write("Predicted class:", predicted_class)
+            
+            # Display cautionary note as a popup message
+            st.warning("""
+            **Accuracy Disclaimer**: The predictions made by this app are based on a machine learning model and may not always be 100% accurate. Use the results as a supplementary tool and consult medical professionals for definitive diagnosis.
+            """)
+
+    
+    # Dataset Information
     st.markdown("""
     ## Dataset Information
+    
     This application uses a deep learning model to classify histopathological images of lung and colon tissues. The dataset used to train this model is publicly available on Kaggle:
     [Lung and Colon Cancer Histopathological Images](https://www.kaggle.com/datasets/andrewmvd/lung-and-colon-cancer-histopathological-images).
     
@@ -43,42 +141,7 @@ def main():
     - Colon benign tissue
     
     The images are histopathological samples stained with Hematoxylin and Eosin (H&E).
-    """)
-
-    # Instructions for the user
-    st.markdown("""
-    ## Instructions
-    1. Upload an image file (JPEG or PNG format) of a histopathological sample.
-    2. Click the "Predict" button to get the classification result.
-    """)
-
-    # Display the upload button at the bottom
-    uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
-
-    if uploaded_file is not None:
-        # Preprocess image
-        image = Image.open(uploaded_file)
-        st.image(image, caption="Uploaded Image",width=300)
-        image_array = preprocess_image(image)
-
-        # Run inference
-        output = run_inference(image_array, 'model.tflite')
-
-        # Define class names
-        class_names = [
-            "Lung benign tissue",
-            "Lung adenocarcinoma",
-            "Lung squamous cell carcinoma",
-            "Colon adenocarcinoma",
-            "Colon benign tissue"
-        ]
-
-        # Get predicted class index with the highest score
-        predicted_class_index = np.argmax(output)
-        
-        # Display only the predicted class
-        predicted_class = class_names[predicted_class_index]
-        st.write("Predicted class:", predicted_class)
+    """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
