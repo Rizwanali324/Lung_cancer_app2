@@ -106,12 +106,13 @@ def main():
 
             # Define class names
             class_names = [
-                "Lung benign tissue",
-                "Lung adenocarcinoma",
-                "Lung squamous cell carcinoma",
-                "Colon adenocarcinoma",
-                "Colon benign tissue"
-            ]
+    "Colon benign tissue",
+    "Colon adenocarcinoma",
+    "Lung squamous cell carcinoma",
+    "Lung adenocarcinoma",
+    "Lung benign tissue"
+]
+
 
             # Get predicted class index with the highest score
             predicted_class_index = np.argmax(output)
