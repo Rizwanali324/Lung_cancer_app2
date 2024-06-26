@@ -1,7 +1,9 @@
+import os 
 import streamlit as st
 import numpy as np
 from PIL import Image
 import tensorflow as tf
+import matplotlib.pyplot as plt
 
 # Function to load and preprocess the image
 def preprocess_image(image):
@@ -27,8 +29,7 @@ def run_inference(image_array, model_path):
 
 # Define Streamlit app
 def main():
-    
-   # Set page configuration with icon
+    # Set page configuration with icon
     st.set_page_config(page_title="Lung Cancer Classification", page_icon=":lungs:", layout='wide', initial_sidebar_state='expanded')
     st.sidebar.markdown("# aibytech")
     
@@ -112,13 +113,12 @@ def main():
 
             # Define class names
             class_names = [
-    "Colon benign tissue",
-    "Colon adenocarcinoma",
-    "Lung squamous cell carcinoma",
-    "Lung adenocarcinoma",
-    "Lung benign tissue"
-]
-
+                "Colon benign tissue",
+                "Colon adenocarcinoma",
+                "Lung squamous cell carcinoma",
+                "Lung adenocarcinoma",
+                "Lung benign tissue"
+            ]
 
             # Get predicted class index with the highest score
             predicted_class_index = np.argmax(output)
