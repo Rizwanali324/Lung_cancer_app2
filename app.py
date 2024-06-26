@@ -27,6 +27,12 @@ def run_inference(image_array, model_path):
 
 # Define Streamlit app
 def main():
+    
+    # Streamlit app setup
+    st.set_page_config(page_title="Lungn Cancer Classification", page_icon=":lung:", layout='wide', initial_sidebar_state='expanded')
+    st.sidebar.markdown("# aibytech")
+    
+    st.sidebar.image('logo.jpg', width=200)
     st.title("Image Classification of Histopathological Images")
 
     # Custom CSS for animated background and different colored sections
