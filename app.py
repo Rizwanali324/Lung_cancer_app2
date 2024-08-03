@@ -31,7 +31,7 @@ def run_inference(image_array, model_path):
 def main():
     # Set page configuration with icon
     st.set_page_config(page_title="Lung Cancer Classification", page_icon=":lungs:", layout='wide', initial_sidebar_state='expanded')
-    st.sidebar.markdown("# aibytech")
+    st.sidebar.markdown("# Aibytec")
     
     st.sidebar.image('logo.jpg', width=200)
     st.title("Image Classification of Histopathological Images")
