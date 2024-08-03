@@ -1,38 +1,62 @@
-import os 
+import os
 import streamlit as st
 import numpy as np
 from PIL import Image
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
-# Function to load and preprocess the image
+# Load the pre-trained model
+model = tf.keras.models.load_model('model.h5')
+
+# Define the directory containing subfolders with class names
+base_dir = 'test_images'
+
+# Function to preprocess the image
 def preprocess_image(image):
-    image = image.resize((100, 100))  # Resize to match model input size
-    image_array = np.array(image) / 255.0  # Normalize pixel values to [0, 1]
+    size = (256, 256)
+    image = image.resize(size)
+    image = image.convert('L')  # Convert to grayscale
+    image_array = np.array(image) / 255.0  # Normalize pixel values
     image_array = np.expand_dims(image_array, axis=0)  # Add batch dimension
     return image_array
 
-# Function to load and run inference on the model
-def run_inference(image_array, model_path):
-    interpreter = tf.lite.Interpreter(model_path=model_path)
-    input_details = interpreter.get_input_details()
-    output_details = interpreter.get_output_details()
-    
-    # Resize input tensor to accommodate the image
-    interpreter.resize_tensor_input(input_details[0]['index'], [image_array.shape[0], 100, 100, 3])
-    interpreter.allocate_tensors()
-    
-    interpreter.set_tensor(input_details[0]['index'], image_array.astype(np.float32))
-    interpreter.invoke()
-    output = interpreter.get_tensor(output_details[0]['index'])
-    return output
+# Function to make predictions
+def predict(image):
+    image_array = preprocess_image(image)
+    predictions = model.predict(image_array)
+    return predictions
+
+# Function to load and display the first image from each class folder
+def display_first_images(class_folders):
+    num_folders = len(class_folders)
+    fig, axes = plt.subplots(1, num_folders, figsize=(10, 3))
+
+    for i, folder in enumerate(class_folders):
+        class_name = os.path.basename(folder)
+        images = os.listdir(folder)
+        image_path = os.path.join(folder, images[0])  # Get the first image in the folder
+        image = Image.open(image_path)
+        image = image.resize((150, 150))  # Resize the image for display
+        axes[i].imshow(image, cmap='gray')
+        axes[i].set_title(class_name)
+        axes[i].axis('off')
+
+    plt.tight_layout()
+    st.pyplot(fig)
 
 # Define Streamlit app
 def main():
-    # Set page configuration with icon
+    global model  # Ensure model is global if you intend to access it inside functions
+    
+    # Load the pre-trained model
+    model = tf.keras.models.load_model('model.h5')
+
+    # Define the directory containing subfolders with class names
+    base_dir = 'test_images'
+    
+    # Streamlit app setup
     st.set_page_config(page_title="Lung Cancer Classification", page_icon=":lungs:", layout='wide', initial_sidebar_state='expanded')
     st.sidebar.markdown("# Aibytec")
-    
     st.sidebar.image('logo.jpg', width=200)
     st.title("Image Classification of Histopathological Images")
 
@@ -89,7 +113,6 @@ def main():
     </style>
     """, unsafe_allow_html=True)
 
-
     # Instructions for the user
     st.markdown("""
     ## Instructions
@@ -98,41 +121,50 @@ def main():
     2. Click the "Predict" button to get the Prediction result.
     """)
 
+    # Get the list of subfolders (each representing a class)
+    class_folders = [os.path.join(base_dir, folder) for folder in os.listdir(base_dir) if os.path.isdir(os.path.join(base_dir, folder))]
+
+    display_first_images(class_folders)
+
     uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
-    
+
     if uploaded_file is not None:
-        # Preprocess image
-        image = Image.open(uploaded_file)
-        st.image(image, caption="Uploaded Image", width=300)
-        image_array = preprocess_image(image)
+        # Display the uploaded image and prediction button in a column layout
+        uploaded_image = Image.open(uploaded_file)
+        col1, col2 = st.columns([2, 1])  # Adjust the width ratio as needed
 
-        # Predict button
-        if st.button("Predict"):
-            # Run inference
-            output = run_inference(image_array, 'model.tflite')
+        with col1:
+            st.image(uploaded_image, caption='Uploaded MRI Image.', width=350)
+        
+        with col2:
+            # Prediction button
+            if st.button('Predict'):
+                # Get predictions
+                predictions = predict(uploaded_image)
+                predicted_class_idx = np.argmax(predictions)
 
-            # Define class names
-            class_names = [
-                "Colon benign tissue",
-                "Colon adenocarcinoma",
-                "Lung squamous cell carcinoma",
-                "Lung adenocarcinoma",
-                "Lung benign tissue"
-            ]
+                # Define class names (ensure it matches your model's output)
+                class_names = [
+                    "Colon benign tissue",
+                    "Colon adenocarcinoma",
+                    "Lung squamous cell carcinoma",
+                    "Lung adenocarcinoma",
+                    "Lung benign tissue"
+                ]
 
-            # Get predicted class index with the highest score
-            predicted_class_index = np.argmax(output)
-            
-            # Display predicted class
-            predicted_class = class_names[predicted_class_index]
-            st.write("Predicted class:", predicted_class)
-            
-            # Display cautionary note as a popup message
-            st.warning("""
-            **Accuracy Disclaimer**: The predictions made by this app are based on a machine learning model and may not always be 100% accurate. Use the results as a supplementary tool and consult medical professionals for definitive diagnosis.
-            """)
+                # Check if predicted_class_idx is within bounds
+                if 0 <= predicted_class_idx < len(class_names):
+                    predicted_class = class_names[predicted_class_idx]
+                    st.write(f"Prediction: {predicted_class}")
 
-    
+                    # Display caution warning
+                    st.warning("""
+                    Accuracy Disclaimer: The predictions provided by this app are generated by a machine learning model currently in the research phase and may not always be fully accurate. Please use these results as supplementary information only. Always consult with medical professionals for a definitive diagnosis and doctor/professional advice.
+                    """)
+
+                else:
+                    st.write("Invalid prediction index.")
+
     # Dataset Information
     st.markdown("""
     ## Dataset Information
