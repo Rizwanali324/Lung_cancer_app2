@@ -30,7 +30,7 @@ def run_inference(image_array, model_path):
 # Define Streamlit app
 def main():
     # Set page configuration with icon
-    st.set_page_config(page_title="Lung Cancer Classification", page_icon=":lungs:", layout='wide', initial_sidebar_state='expanded')
+    st.set_page_config(page_title="Lung Cancer Classification", page_icon="lung.png", layout='wide', initial_sidebar_state='expanded')
     st.sidebar.markdown("# Aibytec")
     
     st.sidebar.image('logo.jpg', width=200)
@@ -88,7 +88,6 @@ def main():
     }
     </style>
     """, unsafe_allow_html=True)
-
 
     # Instructions for the user
     st.markdown("""
